@@ -7,6 +7,13 @@ import sys
 import easyocr
 import re
 from PIL import Image
+from skimage import io
+from skimage.transform import rotate
+from skimage.color import rgb2gray
+from deskew import determine_skew
+from typing import Union
+import math
+
 
 pan_regex = r'^[A-Z\d]{10}$'
 aadhar_regex = r'^\d{4}\s\d{4}\s\d{4}$'
@@ -53,11 +60,6 @@ with detection_graph.as_default():
         tf.import_graph_def(loaded_graph_def, name='')
 
     sess = tf.compat.v1.Session(graph=detection_graph)
-
-
-
-
-# Define input and output tensors (i.e. data) for the object detection classifier
 
 # Input tensor is the image
 image_tensor = detection_graph.get_tensor_by_name('image_tensor:0')
@@ -135,19 +137,10 @@ while(True):
 video.release()
 cv2.destroyAllWindows()
 
-# This is needed since the notebook is stored in the object_detection folder.
-sys.path.append("..")
 
-# Import utilites
-from utils import label_map_util
-from utils import visualization_utils as vis_util
 
-# Name of the directory containing the object detection module we're using
-MODEL_NAME = 'model'
 IMAGE_NAME = 'test_images/image.jpg'
 
-# Grab path to current working directory
-CWD_PATH = os.getcwd()
 
 # Path to frozen detection graph .pb file, which contains the model that is used
 # for object detection.
@@ -236,14 +229,33 @@ im = Image.open(image_path)
 im.crop((left, top, right, bottom)).save(output_path, quality=95)
 
 image_cropped = cv2.imread(output_path)
-cv2.imshow("ID-CARD-CROPPED", image_cropped)
 
 # Initialize the OCR reader
 reader = easyocr.Reader(['en'], gpu=False)  # This needs to run only once to load the model into memory
 
 
+def rotate(
+        image: np.ndarray, angle: float, background: Union[int, tuple[int, int, int]]
+) -> np.ndarray:
+    old_width, old_height = image.shape[:2]
+    angle_radian = math.radians(angle)
+    width = abs(np.sin(angle_radian) * old_height) + abs(np.cos(angle_radian) * old_width)
+    height = abs(np.sin(angle_radian) * old_width) + abs(np.cos(angle_radian) * old_height)
+
+    image_center = tuple(np.array(image.shape[1::-1]) / 2)
+    rot_mat = cv2.getRotationMatrix2D(image_center, angle, 1.0)
+    rot_mat[1, 2] += (width - old_width) / 2
+    rot_mat[0, 2] += (height - old_height) / 2
+    return cv2.warpAffine(image, rot_mat, (int(round(height)), int(round(width))), borderValue=background)
+
+image = cv2.imread('test_images/image.jpg')
+grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
+angle = determine_skew(grayscale)
+rotated = rotate(image, angle, (0, 0, 0))
+cv2.imwrite('image2.jpg', rotated)
+
 # Perform OCR on the image
-result = reader.readtext(image_path)
+result = reader.readtext('image2.jpg')
 
 print("\n")
 
