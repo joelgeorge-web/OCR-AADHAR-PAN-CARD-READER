@@ -125,7 +125,7 @@ while(True):
     cv2.imshow('ID CARD DETECTOR', frame)
 
     # Press 'q' to quit
-    if cv2.waitKey(1) == ord('enter'):
+    if cv2.waitKey(1) == ord('q'):
         break
 
 # Clean up
