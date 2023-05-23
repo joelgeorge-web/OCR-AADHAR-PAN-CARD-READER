@@ -1,4 +1,3 @@
-
 # Import packages
 import os
 import cv2
@@ -7,6 +6,11 @@ import tensorflow as tf
 import sys
 import tensorflow.compat.v1 as tf
 tf.disable_v2_behavior()
+import easyocr
+import re
+
+pan_regex = r'^[A-Z]{5}[A-Z\d]{4}[A-Z]$'
+aadhar_regex = r'^\d{4}\s\d{4}\s\d{4}$'
 
 
 from PIL import Image
@@ -20,7 +24,7 @@ from utils import visualization_utils as vis_util
 
 # Name of the directory containing the object detection module we're using
 MODEL_NAME = 'model'
-IMAGE_NAME = 'test_images/image1.png'
+IMAGE_NAME = 'test_images/image.jpg'
 
 # Grab path to current working directory
 CWD_PATH = os.getcwd()
@@ -116,6 +120,28 @@ cv2.imshow("ID-CARD-CROPPED : ", image_cropped)
 
 # All the results have been drawn on image. Now display the image.
 cv2.imshow('ID CARD DETECTOR', image)
+
+image_path = image_cropped
+# Initialize the OCR reader
+reader = easyocr.Reader(['en'], gpu=False)  # This needs to run only once to load the model into memory
+
+# Perform OCR on the image
+result = reader.readtext(image_path)
+print("\n")
+
+# Print the detected text
+for detection in result:
+    text = detection[1]
+    # Match regular expressions with extracted information
+    aadhar_match = re.search(aadhar_regex, text)
+    pan_match = re.search(pan_regex, text)
+    if aadhar_match:
+        print("AADHAR CARD\n")
+        print(text)
+    elif pan_match:
+        print("PAN CARD\n")
+        corrected_pan_number = text[:5] + text[5:9].replace('I', '1') + text[9:] 
+        print(corrected_pan_number)
 
 # Press any key to close the image
 cv2.waitKey(0)
