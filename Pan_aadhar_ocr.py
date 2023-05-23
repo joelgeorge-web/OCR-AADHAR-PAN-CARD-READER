@@ -125,7 +125,7 @@ while(True):
     cv2.imshow('ID CARD DETECTOR', frame)
 
     # Press 'q' to quit
-    if cv2.waitKey(1) == ord('q'):
+    if cv2.waitKey(1) == ord('enter'):
         break
 
 # Clean up
@@ -230,9 +230,6 @@ output_path = 'test_images/image1_cropped.png'
 
 im = Image.open(image_path)
 im.crop((left, top, right, bottom)).save(output_path, quality=95)
-
-cv2.imshow('ID-CARD-DETECTOR', image)
-
 image_cropped = cv2.imread(output_path)
 cv2.imshow("ID-CARD-CROPPED", image_cropped)
 
@@ -265,3 +262,4 @@ cv2.destroyAllWindows()
 
 # Delete the file
 os.remove(save_path)
+os.remove(output_path)
