@@ -10,7 +10,7 @@ import easyocr
 import re
 from PIL import Image
 
-pan_regex = r'^[A-Z]{5}[A-Z\d]{4}[A-Z]$'
+pan_regex = r'^[A-Z\d]{10}$'
 aadhar_regex = r'^\d{4}\s\d{4}\s\d{4}$'
 
 
@@ -240,18 +240,20 @@ reader = easyocr.Reader(['en'], gpu=False)  # This needs to run only once to loa
 result = reader.readtext(image_path)
 print("\n")
 
+
 # Print the detected text
 for detection in result:
     text = detection[1]
     # Match regular expressions with extracted information
     aadhar_match = re.search(aadhar_regex, text)
-    pan_match = re.search(pan_regex, text)
+    pan_match = re.search(pan_regex, text, re.I)
     if aadhar_match:
         print("AADHAR CARD\n")
         print(text)
     elif pan_match:
         print("PAN CARD\n")
-        corrected_pan_number = text[:5] + text[5:9].replace('I', '1') + text[9:] 
+        corrected_pan = text[:5].upper() + text[5:9].upper() + text[9:].upper()
+        corrected_pan_number = corrected_pan[:5] + corrected_pan[5:9].replace('I', '1').replace('i', '1').replace('o', '0').replace('O', '0').replace('z', '2').replace('Z', '2') + corrected_pan[9:]
         print(corrected_pan_number)
 
 # Press any key to close the image
