@@ -10,7 +10,7 @@ This script allows you to detect an ID card in a video stream and extract the te
 
 ## Usage
 
-1. Run the script by executing the command: `python id_card_detection.py`.
+1. Run the script by executing the command: `python ocr_tensor-v2.py`.
 2. The webcam feed will open, and the script will start detecting ID cards in real-time.
 3. Once an ID card is detected, it will be highlighted, and the extracted text will be printed in the console.
 4. Press 'q' to quit the script.
