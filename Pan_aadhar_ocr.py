@@ -85,7 +85,7 @@ id_card_detected = False
 accuracy_threshold = 0.8
 
 # Define the path to save the image
-save_path = os.path.join(CWD_PATH, 'test_images', 'image.jpg')
+save_path = os.path.join(CWD_PATH, 'test_images', 'image1.jpg')
 
 while(True):
 
