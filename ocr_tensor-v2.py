@@ -14,12 +14,9 @@ from deskew import determine_skew
 from typing import Union
 import math
 
+
+pan_regex = r'^[A-Z\d]{10}$'
 aadhar_regex = r'^\d{4}\s\d{4}\s\d{4}$'
-male = r'(?i)^Male\s*$'
-dob = r'\d{2}/\d{2}/\d{4}'
-name_regex = r'^[A-Za-z]+(?:\s[A-Za-z]+)+$'
-
-
 
 
 # This is needed since the notebook is stored in the object_detection folder.
@@ -89,7 +86,7 @@ id_card_detected = False
 accuracy_threshold = 0.8
 
 # Define the path to save the image
-save_path = os.path.join(CWD_PATH, 'test_images', 'image1.jpg')
+save_path = os.path.join(CWD_PATH, 'test_images', 'image.jpg')
 
 while(True):
 
@@ -142,7 +139,7 @@ cv2.destroyAllWindows()
 
 
 
-IMAGE_NAME = 'test_images/image1.jpg'
+IMAGE_NAME = 'test_images/image.jpg'
 
 
 # Path to frozen detection graph .pb file, which contains the model that is used
@@ -226,6 +223,12 @@ im_width, im_height = shape[1], shape[0]
 
 # Using Image to crop and save the extracted copied image
 image_path = PATH_TO_IMAGE
+output_path = 'test_images/image1_cropped.png'
+
+im = Image.open(image_path)
+im.crop((left, top, right, bottom)).save(output_path, quality=95)
+
+image_cropped = cv2.imread(output_path)
 
 # Initialize the OCR reader
 reader = easyocr.Reader(['en'], gpu=False)  # This needs to run only once to load the model into memory
@@ -245,48 +248,32 @@ def rotate(
     rot_mat[0, 2] += (height - old_height) / 2
     return cv2.warpAffine(image, rot_mat, (int(round(height)), int(round(width))), borderValue=background)
 
-image = cv2.imread('test_images/image1.jpg')
+image = cv2.imread('test_images/image.jpg')
 grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 angle = determine_skew(grayscale)
 rotated = rotate(image, angle, (0, 0, 0))
 cv2.imwrite('image2.jpg', rotated)
 
 # Perform OCR on the image
-result = reader.readtext('image.jpg')
-
-
-for detection in result:
-    text = detection[1]
-    aadhar_match = re.search(aadhar_regex, text)
-    if aadhar_match:
-        print("\n")
-        print("AADHAR CARD")
-        aadhar_no = aadhar_match.group()
-        print("Aadhar No:", aadhar_no)
-
-for detection in result:
-    text = detection[1]
-    name_match = re.search(name_regex, text)
-    if name_match and name_match.group() != "Government of India" and name_match.group() != "GOVERNMENT OF INDIA":
-        name = name_match.group()
-        print("Name:", name)
-
-for detection in result:
-    text = detection[1]
-    dob_match = re.search(dob, text)
-    if dob_match:
-        dob = dob_match.group()
-        print("Date of Birth:", dob)
-
-
-for detection in result:
-    text = detection[1]
-    male_match = re.search(male, text)
-    if male_match:
-        print("Gender: Male")
-
+result = reader.readtext('image2.jpg')
 
 print("\n")
+
+
+# Print the detected text
+for detection in result:
+    text = detection[1]
+    # Match regular expressions with extracted information
+    aadhar_match = re.search(aadhar_regex, text)
+    pan_match = re.search(pan_regex, text, re.I)
+    if aadhar_match:
+        print("AADHAR CARD\n")
+        print(text)
+    elif pan_match:
+        print("PAN CARD\n")
+        corrected_pan = text[:5].upper() + text[5:9].upper() + text[9:].upper()
+        corrected_pan_number = corrected_pan[:5] + corrected_pan[5:9].replace('I', '1').replace('i', '1').replace('o', '0').replace('O', '0').replace('z', '2').replace('Z', '2') + corrected_pan[9:]
+        print(corrected_pan_number)
 
 # Press any key to close the image
 cv2.waitKey(0)
@@ -296,4 +283,5 @@ cv2.destroyAllWindows()
 
 # Delete the file
 os.remove(save_path)
+os.remove(output_path)
 os.remove('image2.jpg')
