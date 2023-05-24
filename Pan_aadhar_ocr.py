@@ -265,3 +265,4 @@ cv2.destroyAllWindows()
 # Delete the file
 os.remove(save_path)
 os.remove(output_path)
+os.remove(image2.jpg)
