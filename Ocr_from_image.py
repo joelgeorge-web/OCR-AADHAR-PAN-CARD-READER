@@ -17,10 +17,11 @@ import math
 aadhar_regex = r'^\d{4}\s\d{4}\s\d{4}$'
 male = r'(?i)^Male\s*$'
 dob = r'\d{2}/\d{2}/\d{4}'
-name_regex = r'^[A-Za-z]+(?:\s[A-Za-z]+)+$'
-pan_regex = r'^[A-Z]{5}[0-9]{4}[A-Z]{1}$'
-
-
+name_regex = name_regex = r'^[A-Za-z]+(?:\s[A-Za-z]+){1,2}$'
+pan_regex = pan_regex = r'^[A-Z\d]{10}$'
+name_found = False  # Flag to track if a name has been printed
+name_found1 = False  # Flag to track if a name has been printed
+global n1
 
 # This is needed since the notebook is stored in the object_detection folder.
 sys.path.append("..")
@@ -48,7 +49,8 @@ def rotate(
     rot_mat[0, 2] += (height - old_height) / 2
     return cv2.warpAffine(image, rot_mat, (int(round(height)), int(round(width))), borderValue=background)
 
-image = cv2.imread('test_images/image.jpg')
+a = input("Enter the path of the image: ")
+image = cv2.imread(a + '.jpg')
 grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 angle = determine_skew(grayscale)
 rotated = rotate(image, angle, (0, 0, 0))
@@ -73,15 +75,14 @@ for detection in result:
             if name_match and name_match.group() != "Government of India" and name_match.group() != "GOVERNMENT OF INDIA":
                 name = name_match.group()
                 print("Name:", name)
-
+                name_found = True
+                break  # Stop iterating after finding a valid name
         for detection in result:
             text = detection[1]
             dob_match = re.search(dob, text)
             if dob_match:
                 dob = dob_match.group()
                 print("Date of Birth:", dob)
-
-
         for detection in result:
             text = detection[1]
             male_match = re.search(male, text)
@@ -91,7 +92,34 @@ for detection in result:
         print("\n")
         print("PAN CARD")
         pan_no = pan_match.group()
-        print("Pan No:", pan_no)
+        corrected_pan = pan_no[:5].upper() + pan_no[5:9].upper() + pan_no[9:].upper()
+        pan_no = corrected_pan[:5] + corrected_pan[5:9].replace('I', '1').replace('i', '1').replace('o', '0').replace('O', '0').replace('z', '2').replace('Z', '2') + corrected_pan[9:]
+        print("Pan Account No:", pan_no)
+        for detection in result:
+            text = detection[1]
+            text.upper()
+            name_match = re.search(name_regex, text)
+            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" :
+                name = name_match.group()
+                print("Name:", name.upper())
+                name_found = True
+                n1 = name.upper()
+                break  # Stop iterating after finding a valid name
+        for detection in result:
+            text = detection[1]
+            text.upper()
+            name_match = re.search(name_regex, text)
+            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" and name_match.group() != n1:
+                name1 = name_match.group()
+                print("Father's Name:", name1.upper()) 
+                name_found = True
+                break  # Stop iterating after finding a valid name       
+        for detection in result:
+            text = detection[1]
+            dob_match = re.search(dob, text)
+            if dob_match:
+                dob = dob_match.group()
+                print("Date of Birth:", dob)
 
 print("\n")
 
