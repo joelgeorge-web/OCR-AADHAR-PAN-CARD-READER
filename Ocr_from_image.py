@@ -89,6 +89,7 @@ for detection in result:
             if male_match:
                 print("Gender: Male")
     elif pan_match:
+        global n1
         print("\n")
         print("PAN CARD")
         pan_no = pan_match.group()
@@ -109,7 +110,7 @@ for detection in result:
             text = detection[1]
             text.upper()
             name_match = re.search(name_regex, text)
-            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" and name_match.group() != n1:
+            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" and name_match.group().upper() != n1:
                 name1 = name_match.group()
                 print("Father's Name:", name1.upper()) 
                 name_found = True
