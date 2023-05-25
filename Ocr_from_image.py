@@ -21,6 +21,8 @@ name_regex = r'^[A-Za-z]+(?:\s[A-Za-z]+){1,2}$'
 pan_regex = r'^[A-Z\d]{10}$'
 name_found = False  # Flag to track if a name has been printed
 name_found1 = False  # Flag to track if a name has been printed
+name_found2 = False  # Flag to track if a name has been printed
+id_match_found = False # Flag to track if an ID match has been found
 global n1
 
 # This is needed since the notebook is stored in the object_detection folder.
@@ -72,7 +74,7 @@ for detection in result:
         for detection in result:
             text = detection[1]
             name_match = re.search(name_regex, text)
-            if name_match and name_match.group() != "Government of India" and name_match.group() != "GOVERNMENT OF INDIA":
+            if name_match and name_match.group() != "Government of India" and name_match.group() != "GOVERNMENT OF INDIA" and name_match.group() != "GOVERNMENT OF INDIA" and name_match.group() != "GOvernment OFINDIA" and name_match.group() != "GOVERNMENT Of INDIA":
                 name = name_match.group()
                 print("Name:", name)
                 name_found = True
@@ -88,6 +90,10 @@ for detection in result:
             male_match = re.search(male, text)
             if male_match:
                 print("Gender: Male")
+        # Handle Aadhar card fields
+        id_match_found = True
+        break  # Stop iterating after finding a valid ID
+
     elif pan_match:
         global n1
         print("\n")
@@ -100,7 +106,7 @@ for detection in result:
             text = detection[1]
             text.upper()
             name_match = re.search(name_regex, text)
-            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" :
+            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" and name_match.group() != "GOVERNMENT OF INDIA" and name_match.group() != "GOvernment OFINDIA" and name_match.group() != "GOVERNMENT Of INDIA":
                 name = name_match.group()
                 print("Name:", name.upper())
                 name_found = True
@@ -110,7 +116,7 @@ for detection in result:
             text = detection[1]
             text.upper()
             name_match = re.search(name_regex, text)
-            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" and name_match.group().upper() != n1:
+            if name_match and name_match.group() != "GOVT OF INDIA" and name_match.group() != "Dale of Birtn" and name_match.group() != "INCOME TAX DEPARTMENT" and name_match.group() != "GOVERNMENT OF INDIA" and name_match.group() != "GOvernment OFINDIA" and name_match.group() != "GOVERNMENT Of INDIA" and name_match.group().upper() != n1:
                 name1 = name_match.group()
                 print("Father's Name:", name1.upper()) 
                 name_found = True
@@ -122,7 +128,17 @@ for detection in result:
                 dob = dob_match.group()
                 print("Date of Birth:", dob)
 
+        # Handle Aadhar card fields
+        id_match_found = True
+        break  # Stop iterating after finding a valid ID
+
+print("\n")
+
+if not id_match_found:
+    print("ID match not found")
+
 print("\n")
 
 # Delete the file
 os.remove('image2.jpg')
+
