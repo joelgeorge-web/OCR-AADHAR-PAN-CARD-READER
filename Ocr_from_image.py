@@ -17,8 +17,8 @@ import math
 aadhar_regex = r'^\d{4}\s\d{4}\s\d{4}$'
 male = r'(?i)^Male\s*$'
 dob = r'\d{2}/\d{2}/\d{4}'
-name_regex = name_regex = r'^[A-Za-z]+(?:\s[A-Za-z]+){1,2}$'
-pan_regex = pan_regex = r'^[A-Z\d]{10}$'
+name_regex = r'^[A-Za-z]+(?:\s[A-Za-z]+){1,2}$'
+pan_regex = r'^[A-Z\d]{10}$'
 name_found = False  # Flag to track if a name has been printed
 name_found1 = False  # Flag to track if a name has been printed
 global n1
