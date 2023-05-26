@@ -32,6 +32,29 @@ sys.path.append("..")
 from utils import label_map_util
 from utils import visualization_utils as vis_util
 
+# Grab path to current working directory
+CWD_PATH = os.getcwd()
+
+# Define the path to save the image
+save_path = os.path.join(CWD_PATH, 'test_images', 'image.jpg')
+
+while True:
+    # Acquire frame from the video feed
+    ret, frame = video.read()
+
+    # Display the frame
+    cv2.imshow('IMAGE', frame)
+
+    # Press 's' to capture and save the image
+    if cv2.waitKey(1) == ord('q'):
+        cv2.imwrite(save_path, frame)
+        break
+
+# Clean up
+video.release()
+cv2.destroyAllWindows()
+
+
 
 # Initialize the OCR reader
 reader = easyocr.Reader(['en'], gpu=False)  # This needs to run only once to load the model into memory
@@ -51,8 +74,8 @@ def rotate(
     rot_mat[0, 2] += (height - old_height) / 2
     return cv2.warpAffine(image, rot_mat, (int(round(height)), int(round(width))), borderValue=background)
 
-a = input("Enter the path of the image: ")
-image = cv2.imread(a + '.jpg')
+# Load the captured image
+image = cv2.imread(save_path)
 grayscale = cv2.cvtColor(image, cv2.COLOR_BGR2GRAY)
 angle = determine_skew(grayscale)
 rotated = rotate(image, angle, (0, 0, 0))
@@ -135,10 +158,17 @@ for detection in result:
 print("\n")
 
 if not id_match_found:
-    print("ID match not found")
+    print("No valid ID card found")
+    print("The following text was detected:")
+    for detection in result:
+        text = detection[1]
+        print(text.upper())
+
+
 
 print("\n")
 
 # Delete the file
+os.remove(save_path)
 os.remove('image2.jpg')
 
