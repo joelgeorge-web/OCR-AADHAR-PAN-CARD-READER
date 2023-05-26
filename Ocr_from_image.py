@@ -38,6 +38,11 @@ CWD_PATH = os.getcwd()
 # Define the path to save the image
 save_path = os.path.join(CWD_PATH, 'test_images', 'image.jpg')
 
+# Initialize webcam feed
+video = cv2.VideoCapture(0)
+ret = video.set(3, 1280)
+ret = video.set(4, 720)
+
 while True:
     # Acquire frame from the video feed
     ret, frame = video.read()
